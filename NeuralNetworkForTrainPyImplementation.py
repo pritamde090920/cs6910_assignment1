@@ -671,7 +671,7 @@ class FeedForwardNeuralNetwork:
     return self.W,self.B
 
 
-  def modelFitting(self,mom,beta,beta1,beta2,eps,optimizer,batch_size):
+  def modelFitting(self,mom,beta,beta1,beta2,eps,optimizer,batch_size,test,confusion_matrix,dataset_name):
     '''
       Parameters:
         batch_size
@@ -707,8 +707,22 @@ class FeedForwardNeuralNetwork:
     for i in range(len(self.y_test)):
       _,_,y_cap=self.forward_propagation_test(w,b,self.x_test[i])
       yPred.append(np.array(y_cap))
+    
+    if(test==1):
+      print("\n\nTest Accuracy : ",Accuracy.testAccuracy(self.y_test,yPred))
 
-    print("\n\nTest Accuracy : ",Accuracy.testAccuracy(self.y_test,yPred))
+    if(confusion_matrix==1):
+      output_class=list()
+      if(dataset_name=="fashion_mnist"):
+        output_class=["T-shirt/top","Trouser","Pullover","Dress","Coat","Sandal","Shirt","Sneaker","Bag","Ankle boot"]
+      else:
+        output_class=["0","1","2","3","4","5","6","7","8","9"]
+      true_class_labels=list()
+      predicted_class_labels=list()
+      for i in range(self.y_test.shape[0]):
+        true_class_labels.append(output_class[np.argmax(self.y_test[i])])
+        predicted_class_labels.append(output_class[np.argmax(yPred[i])])
+      wandb.sklearn.plot_confusion_matrix(true_class_labels,predicted_class_labels,output_class)
 
 
   def modelFittingForMnist(self,mom,beta,beta1,beta2,eps,optimizer,batch_size):

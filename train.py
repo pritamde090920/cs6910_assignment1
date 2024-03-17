@@ -37,6 +37,8 @@ def arguments():
     commandLineArgument.add_argument('-nhl','--num_layers',type = int,help="Number of hidden layers used in feedforward neural network")
     commandLineArgument.add_argument('-sz','--hidden_size',type = int,help="Number of hidden neurons in a feedforward layer")
     commandLineArgument.add_argument('-a','--activation',help="choices: ['identity', 'sigmoid', 'tanh', 'ReLU']")
+    commandLineArgument.add_argument('-c','--confusion',type = int,help="choices: [0,1]")
+    commandLineArgument.add_argument('-t','--test',type = int,help="choices: [0,1]")
 
     return commandLineArgument.parse_args()
 
@@ -61,6 +63,8 @@ def main():
     hls=4
     nhls=64
     act="relu"
+    confusion_matrix=0
+    test=0
 
     '''call to argument function to get the arguments'''
     argumentsPassed=arguments()
@@ -102,6 +106,10 @@ def main():
         nhls=argumentsPassed.hidden_size
     if argumentsPassed.activation is not None:
         act=argumentsPassed.activation
+    if argumentsPassed.confusion is not None:
+        confusion_matrix=argumentsPassed.confusion
+    if argumentsPassed.test is not None:
+        test=argumentsPassed.test
     
     '''setting the dataset and reading the corresponding train and test data'''
     if(dataset_name=="fashion_mnist"):
@@ -122,7 +130,8 @@ def main():
 
     '''calling the functions with the parameters'''
     Model=FeedForwardNeuralNetwork(x_train,y_train,x_val,y_val,x_test,y_test,hls=hls,neurons_in_hl=nhls,activation=act,initialization=wi,epochs=epochs,eta=learning_rate,wd=wd,loss=loss)
-    Model.modelFitting(mom=mom,beta=beta,beta1=beta1,beta2=beta2,eps=epsilon,optimizer=optimizer,batch_size=batch_size)
+    Model.modelFitting(mom=mom,beta=beta,beta1=beta1,beta2=beta2,eps=epsilon,optimizer=optimizer,batch_size=batch_size,test=test,confusion_matrix=confusion_matrix,dataset_name=dataset_name)
+    wandb.finish()
 
 if __name__ == '__main__':
     main()
